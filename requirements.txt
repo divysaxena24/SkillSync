@@ -4,4 +4,3 @@ scikit-learn
 pypdf
 gensim
 streamlit
-pytest
