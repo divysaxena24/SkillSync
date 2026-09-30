@@ -40,37 +40,76 @@ SkillSync is an automated Resume–Job Description matching platform designed to
 
 ---
 
-## System Architecture
+## System Architecture & Workflow
 
-The diagram below illustrates the end-to-end data flow and processing pipeline implemented in SkillSync:
+### System Architecture Diagram
+
+The simplified diagram below illustrates the end-to-end data flow and processing pipeline implemented in SkillSync:
 
 ```mermaid
+%%{init: {'flowchart': {'curve': 'straight'}}}%%
 flowchart TD
-    A[Resume PDF Document] --> B[PDF Text Extraction - pypdf]
-    C[Job Description Text] --> D[Text Normalization]
+    subgraph Inputs["1. Input Data"]
+        A[Resume PDF]
+        B[Job Description]
+    end
 
-    B --> E[NLP Preprocessing - NLTK]
-    D --> E
+    subgraph Processing["2. NLP Processing Engine"]
+        C[Text Extraction & Cleaning]
+        D[Canonical Skill Extraction]
+        E[TF-IDF Vectorization]
+    end
 
-    E --> F[Skill Extraction Engine]
-    E --> G[TF-IDF Vectorizer - scikit-learn]
+    subgraph Scoring["3. Scoring & Classification"]
+        F[Weighted Score Engine<br/>(70% Skill Score + 30% TF-IDF)]
+        G[Match Verdict Classifier]
+    end
 
-    F --> H[Skill Canonicalization & Alias Mapping]
-    H --> I[Skill Coverage Calculation]
+    subgraph Dashboard["4. Streamlit Dashboard"]
+        H[Compatibility Score & Verdict]
+        I[Matched & Missing Skills]
+    end
 
-    G --> J[Cosine Similarity & Coverage Scoring]
+    A --> C
+    B --> C
+    C --> D
+    C --> E
+    D --> F
+    E --> F
+    F --> G
+    G --> H
+    F --> I
+```
 
-    I --> K[Weighted Final Score Engine]
-    J --> K
+### Use Case Diagram
 
-    K --> L[Rule-Based Verdict Classification]
-    I --> M[Matched Skills Identification]
-    I --> N[Missing Skills Identification]
+The diagram below outlines the primary use cases and user interactions within the SkillSync platform:
 
-    L --> O[Streamlit Web Interface]
-    K --> O
-    M --> O
-    N --> O
+```mermaid
+%%{init: {'flowchart': {'curve': 'straight'}}}%%
+flowchart LR
+    User([User / Recruiter])
+
+    subgraph System["SkillSync Platform"]
+        UC1(Upload Resume PDF)
+        UC2(Input Job Description)
+        UC3(Select Sample Presets)
+        UC4(Run Compatibility Match)
+        UC5(View Score & Verdict)
+        UC6(Inspect Matched & Missing Skills)
+    end
+
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    User --> UC4
+    User --> UC5
+    User --> UC6
+    UC1 --> UC4
+    UC2 --> UC4
+    UC3 --> UC4
+    UC4 --> UC5
+    UC4 --> UC6
 ```
 
 ---
