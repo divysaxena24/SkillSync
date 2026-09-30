@@ -636,20 +636,33 @@ def render_hero():
     )
 
 
+SAMPLE_JDS = {
+    "Python Backend Developer": """We are seeking a skilled Python Backend Developer to build scalable microservices.
+Required technical skills include: Python, FastAPI, PostgreSQL, Docker, Kubernetes, Redis, AWS, Git, and REST API design.""",
+    "Data Scientist": """Looking for a Data Scientist to build predictive ML algorithms and data pipelines.
+Core requirements: Python, Pandas, NumPy, Scikit-learn, TensorFlow, SQL, Data Science, Generative AI, and Machine Learning.""",
+    "Fullstack Developer": """Hiring a Fullstack Developer to build dynamic web applications.
+Key requirements: React, TypeScript, Node.js, Express, PostgreSQL, Tailwind CSS, REST API, Git, and Web Development.""",
+    "Software Engineer (SDE)": """We are looking for a Software Engineer to develop enterprise applications.
+Required skills: Java, Spring Boot, SQL, Docker, Microservices, CI/CD, Linux, AWS, and Git."""
+}
+
+
 def render_input_section():
     st.markdown(
         """
         <div class="input-wrapper">
-            <div class="samples-bar">
-                <span class="samples-label">Try a sample:</span>
-                <span class="sample-pill">Software Engineer (SDE)</span>
-                <span class="sample-pill">Python Backend Developer</span>
-                <span class="sample-pill">Data Scientist</span>
-                <span class="sample-pill">Fullstack Developer</span>
-            </div>
+            <div class="samples-label" style="margin-bottom:0.5rem;">Try a sample job description:</div>
         """,
         unsafe_allow_html=True,
     )
+
+    preset_cols = st.columns(4)
+    for idx, (title, sample_text) in enumerate(SAMPLE_JDS.items()):
+        if preset_cols[idx].button(title, key=f"preset_btn_{idx}"):
+            st.session_state["jd_input"] = sample_text
+
+    st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2, gap="large")
 
@@ -668,12 +681,15 @@ def render_input_section():
                 unsafe_allow_html=True,
             )
 
+    default_jd = st.session_state.get("jd_input", "")
+
     with col2:
         st.markdown("<p style='font-size:0.9rem; font-weight:750; color:#0f172a; margin-bottom:0.4rem;'>💼 Paste Job Description</p>", unsafe_allow_html=True)
         job_description = st.text_area(
             "Job Description",
+            value=default_jd,
             height=200,
-            placeholder="Paste a job description here...",
+            placeholder="Paste a job description here or click a sample preset above...",
             label_visibility="collapsed",
         )
         char_count = len(job_description)
@@ -916,6 +932,26 @@ def render_results(result):
         else:
             st.info("No known skills were detected in the resume text.")
 
+    import json
+    report_json = json.dumps({
+        "compatibility_score": f"{score:.2f}%",
+        "verdict": verdict,
+        "skill_match_score": f"{skill_score:.2f}%",
+        "tfidf_similarity": f"{tfidf_score:.2f}%",
+        "matched_skills": matched_skills,
+        "missing_skills": missing_skills,
+        "resume_skills": resume_skills,
+    }, indent=2)
+
+    st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
+    st.download_button(
+        label="📥 Download Match Report (JSON)",
+        data=report_json,
+        file_name="skillsync_match_report.json",
+        mime="application/json",
+        help="Export complete match evaluation metrics and skill gaps as a JSON report."
+    )
+
 
 def render_footer():
     st.markdown(
@@ -948,13 +984,17 @@ if analyze_clicked:
             resume_text = extract_pdf_text(resume_file)
 
             if not resume_text.strip():
-                st.error("Could not extract text from this PDF file.")
+                st.error("Could not extract text from this PDF file. Please ensure the PDF is not an image scan.")
                 st.stop()
 
-            # Execute NLP scoring (unmodified backend logic)
+            # Execute NLP scoring
             result = calculate_final_score(resume_text, job_description)
 
         st.markdown("<div style='margin-top:1.5rem;'></div>", unsafe_allow_html=True)
+
+        with st.expander("📄 Preview Extracted Resume Text"):
+            st.text_area("Extracted Text", value=resume_text, height=150, disabled=True, label_visibility="collapsed")
+
         render_results(result)
         render_features_grid()
         render_footer()

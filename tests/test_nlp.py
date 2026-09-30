@@ -332,3 +332,76 @@ class TestEdgeCases:
         result = calculate_final_score("asdfghjkl qwertyuiop zxcvbnm", "12345 67890 !@#$%^&*()")
         assert result["final_score"] == 0.0
         assert result["matched_skills"] == []
+
+
+# ============================================================
+# 10. REFINED BOUNDARY & FALSE POSITIVE ELIMINATION TESTS
+# ============================================================
+
+class TestRefinedBoundaryExtraction:
+    def test_cpp_and_csharp_do_not_trigger_false_positive_c(self):
+        text = "Experienced software engineer proficient in C++ and C# development."
+        extracted = extract_skills(text)
+        assert "c++" in extracted
+        assert "c#" in extracted
+        assert "c" not in extracted
+
+    def test_standalone_c_triggers_c(self):
+        text = "Proficient in C, C++, and Python."
+        extracted = extract_skills(text)
+        assert "c" in extracted
+        assert "c++" in extracted
+
+    def test_react_js_does_not_trigger_false_positive_javascript(self):
+        text = "Built web applications using React.js and Node.js."
+        extracted = extract_skills(text)
+        assert "react" in extracted
+        assert "node.js" in extracted
+        assert "javascript" not in extracted
+
+    def test_explicit_js_triggers_javascript(self):
+        text = "Fullstack developer skilled in JS, React.js, and Node.js."
+        extracted = extract_skills(text)
+        assert "javascript" in extracted
+        assert "react" in extracted
+        assert "node.js" in extracted
+
+    def test_r_and_d_does_not_trigger_false_positive_r_language(self):
+        text = "Led R&D and R and D innovation projects in healthcare."
+        extracted = extract_skills(text)
+        assert "r" not in extracted
+
+    def test_r_programming_triggers_r_language(self):
+        text = "Statistical analysis using R programming and RStudio."
+        extracted = extract_skills(text)
+        assert "r" in extracted
+
+    def test_go_verb_does_not_trigger_golang(self):
+        text = "We go to office every day and have things to go."
+        extracted = extract_skills(text)
+        assert "go" not in extracted
+
+    def test_golang_tech_triggers_go(self):
+        text = "Backend services developed in Golang and Go programming."
+        extracted = extract_skills(text)
+        assert "go" in extracted
+
+    def test_spring_season_does_not_trigger_spring_framework(self):
+        text = "Graduated in Spring 2024 during the spring semester."
+        extracted = extract_skills(text)
+        assert "spring" not in extracted
+
+    def test_spring_boot_tech_triggers_spring_framework(self):
+        text = "Developed microservices with Spring Boot and Spring Framework."
+        extracted = extract_skills(text)
+        assert "spring" in extracted
+
+    def test_modern_ai_ml_aliases(self):
+        text = "Building Generative AI apps with RAG, LangChain, sklearn, and Amazon Web Services."
+        extracted = extract_skills(text)
+        assert "generative ai" in extracted
+        assert "rag" in extracted
+        assert "langchain" in extracted
+        assert "scikit-learn" in extracted
+        assert "aws" in extracted
+

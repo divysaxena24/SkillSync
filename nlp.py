@@ -118,378 +118,7 @@ def load_resume_paths():
     return resumes
 
 
-# ============================================================
-# SKILL DICTIONARY
-# ============================================================
-
-SKILLS = [
-
-    # --------------------------------------------------------
-    # IT / SOFTWARE / DATA SCIENCE / DEVOPS
-    # --------------------------------------------------------
-
-    "python",
-    "java",
-    "c++",
-    "c#",
-    "c",
-    "javascript",
-    "typescript",
-    "go",
-    "golang",
-    "rust",
-    "ruby",
-    "php",
-    "swift",
-    "kotlin",
-    "scala",
-    "r",
-
-    "html",
-    "css",
-    "sql",
-
-    "react",
-    "react.js",
-    "next.js",
-    "vue.js",
-    "angular",
-
-    "node.js",
-    "express",
-    "express.js",
-
-    "django",
-    "flask",
-    "fastapi",
-    "spring boot",
-    "spring",
-    "asp.net",
-    "laravel",
-    "bootstrap",
-    "tailwind",
-
-    "mysql",
-    "postgresql",
-    "postgres",
-    "mongodb",
-    "redis",
-    "sqlite",
-    "oracle",
-    "dynamodb",
-    "cassandra",
-    "elasticsearch",
-
-    "aws",
-    "azure",
-    "gcp",
-    "cloud",
-    "docker",
-    "kubernetes",
-    "k8s",
-    "terraform",
-    "ansible",
-    "jenkins",
-    "ci/cd",
-
-    "git",
-    "github",
-    "gitlab",
-
-    "linux",
-    "unix",
-    "bash",
-    "shell",
-
-    "rest api",
-    "restful api",
-    "graphql",
-    "microservices",
-
-    "machine learning",
-    "deep learning",
-    "nlp",
-    "natural language processing",
-    "tensorflow",
-    "pytorch",
-
-    "scikit-learn",
-    "pandas",
-    "numpy",
-    "opencv",
-
-    "data analysis",
-    "data science",
-    "neural networks",
-    "computer vision",
-
-    "programming",
-    "web development",
-
-    # --------------------------------------------------------
-    # HUMAN RESOURCES
-    # --------------------------------------------------------
-
-    "recruitment",
-    "talent acquisition",
-    "employee relations",
-    "talent management",
-    "human resources",
-    "hris",
-    "onboarding",
-    "performance management",
-    "payroll",
-    "employee engagement",
-    "compensation",
-    "benefits",
-    "labor laws",
-    "succession planning",
-    "conflict resolution",
-    "interviewing",
-    "sourcing",
-
-    # --------------------------------------------------------
-    # FINANCE / ACCOUNTING / BANKING
-    # --------------------------------------------------------
-
-    "financial analysis",
-    "accounting",
-    "financial reporting",
-    "financial planning",
-    "auditing",
-    "budgeting",
-    "forecasting",
-    "taxation",
-    "bookkeeping",
-    "risk management",
-    "compliance",
-    "treasury",
-    "portfolio management",
-    "cash flow",
-    "quickbooks",
-    "sap",
-    "tally",
-    "excel",
-    "financial modeling",
-    "investment banking",
-    "wealth management",
-    "credit analysis",
-    "loans",
-    "retail banking",
-    "commercial banking",
-    "reconciliation",
-    "financial statements",
-
-    # --------------------------------------------------------
-    # HEALTHCARE
-    # --------------------------------------------------------
-
-    "patient care",
-    "clinical",
-    "nursing",
-    "medical records",
-    "emr",
-    "ehr",
-    "healthcare management",
-    "triage",
-    "phlebotomy",
-    "diagnostics",
-    "patient safety",
-    "pharmacology",
-    "icu",
-    "cpr",
-    "bls",
-    "vital signs",
-    "health information management",
-    "patient assessment",
-
-    # --------------------------------------------------------
-    # SALES / BUSINESS / MARKETING / PR
-    # --------------------------------------------------------
-
-    "sales",
-    "business development",
-    "lead generation",
-    "crm",
-    "salesforce",
-    "account management",
-    "negotiation",
-    "client relations",
-    "b2b",
-    "b2c",
-    "cold calling",
-    "digital marketing",
-    "seo",
-    "sem",
-    "content marketing",
-    "social media marketing",
-    "google analytics",
-    "copywriting",
-    "public relations",
-    "brand management",
-    "media relations",
-    "press releases",
-    "campaign management",
-    "market research",
-    "marketing strategy",
-
-    # --------------------------------------------------------
-    # DESIGN / ARTS / APPAREL
-    # --------------------------------------------------------
-
-    "ui/ux",
-    "graphic design",
-    "photoshop",
-    "illustrator",
-    "figma",
-    "adobe xd",
-    "indesign",
-    "wireframing",
-    "prototyping",
-    "user research",
-    "fashion design",
-    "textile design",
-    "apparel design",
-    "creative direction",
-    "sketching",
-    "adobe creative suite",
-
-    # --------------------------------------------------------
-    # OTHER DOMAINS
-    # --------------------------------------------------------
-
-    "aviation",
-    "flight operations",
-    "aircraft maintenance",
-    "cabin crew",
-    "air traffic control",
-
-    "automotive engineering",
-    "vehicle maintenance",
-    "autocad",
-    "cad",
-    "quality control",
-
-    "construction management",
-    "site supervision",
-    "civil engineering",
-    "project planning",
-    "building codes",
-
-    "agronomy",
-    "crop management",
-    "soil science",
-    "agricultural engineering",
-    "irrigation",
-
-    "culinary arts",
-    "food preparation",
-    "menu planning",
-    "kitchen management",
-    "food safety",
-    "haccp",
-
-    "bpo",
-    "customer service",
-    "call center",
-    "technical support",
-    "helpdesk",
-    "ticket resolution",
-
-    "legal research",
-    "litigation",
-    "contract drafting",
-    "corporate law",
-    "legal compliance",
-    "legal advisory",
-
-    "personal training",
-    "fitness instruction",
-    "nutrition",
-    "wellness coaching",
-    "strength training",
-
-    "teaching",
-    "curriculum development",
-    "classroom management",
-    "lesson planning",
-    "educational leadership",
-
-    "management consulting",
-    "strategy",
-    "process improvement",
-    "business analysis",
-    "change management",
-]
-
-
-# ============================================================
-# CANONICAL SKILL ALIASES
-# ============================================================
-
-SKILL_ALIASES = {
-
-    # Programming
-    "js": "javascript",
-    "jscript": "javascript",
-
-    "ts": "typescript",
-
-    "py": "python",
-
-    # Machine Learning
-    "ml": "machine learning",
-    "dl": "deep learning",
-
-    # React
-    "react.js": "react",
-    "reactjs": "react",
-
-    # Node
-    "node": "node.js",
-    "nodejs": "node.js",
-
-    # Express
-    "express.js": "express",
-    "expressjs": "express",
-
-    # PostgreSQL
-    "postgres": "sql",
-    "postgresql": "sql",
-
-    # MySQL
-    "mysql": "sql",
-
-    # PL/SQL
-    "pl/sql": "sql",
-
-    # Kubernetes
-    "k8s": "kubernetes",
-
-    # HR
-    "hr": "human resources",
-
-    # QA
-    "qa": "quality control",
-
-    # PR
-    "pr": "public relations",
-
-    # UI/UX
-    "ui": "ui/ux",
-    "ux": "ui/ux",
-}
-
-
-# ============================================================
-# NON-SKILL GENERIC TERMS
-# ============================================================
-
-GENERIC_TERMS = {
-    "software engineer",
-    "software development",
-    "problem solving",
-}
+from taxonomy import SKILLS, SKILL_ALIASES, GENERIC_TERMS
 
 
 # ============================================================
@@ -540,6 +169,48 @@ def canonicalize_skill(skill):
 # SKILL EXTRACTION
 # ============================================================
 
+def _is_valid_skill_context(skill_norm, raw_text):
+    """
+    Validate match context to eliminate false positives for ambiguous skills.
+    """
+    text_lower = raw_text.lower()
+
+    # 1. Standalone 'c' vs 'c++' or 'c#'
+    if skill_norm == "c":
+        # Must have standalone 'c' NOT followed by + or #
+        if not re.search(r"(?<![a-z0-9])c(?![a-z0-9\+\#])", text_lower):
+            return False
+
+    # 2. 'js' / 'javascript' false positive from '.js' suffix in framework names (e.g. React.js)
+    if skill_norm in ("js", "javascript"):
+        # Check if standalone 'js' or 'javascript' exists without a leading dot
+        has_standalone_js = re.search(r"(?<![a-z0-9\.])javascript(?![a-z0-9])", text_lower) or re.search(r"(?<![a-z0-9\.])js(?![a-z0-9])", text_lower)
+        if not has_standalone_js:
+            return False
+
+    # 3. 'r' language vs 'R&D' or 'R and D'
+    if skill_norm == "r":
+        clean_r_text = re.sub(r"(?<![a-z0-9])r\s*(\&|and|\/)\s*d(?![a-z0-9])", " ", text_lower)
+        if not re.search(r"(?<![a-z0-9])r(?![a-z0-9\+\#])", clean_r_text):
+            return False
+
+    # 4. 'go' language vs verb usage ('go to', 'to go', 'on the go', 'going')
+    if skill_norm == "go":
+        has_tech_go = re.search(r"(?<![a-z0-9])(golang|go\s+(programming|developer|lang|backend|engineer))(?![a-z0-9])", text_lower)
+        if not has_tech_go:
+            if re.search(r"(?<![a-z0-9])(to\s+go|go\s+to|on\s+the\s+go)(?![a-z0-9])", text_lower):
+                return False
+
+    # 5. 'spring' framework vs season/quarter context
+    if skill_norm == "spring":
+        has_spring_tech = re.search(r"(?<![a-z0-9])spring\s*(boot|framework|mvc|security|data|cloud)(?![a-z0-9])", text_lower)
+        if not has_spring_tech:
+            if re.search(r"(?<![a-z0-9])spring\s*(20\d\d|quarter|semester|break|season|term)(?![a-z0-9])", text_lower):
+                return False
+
+    return True
+
+
 def extract_skills(text):
     """
     Extract skills and return only canonical skill names.
@@ -569,25 +240,22 @@ def extract_skills(text):
 
         escaped = re.escape(skill_norm)
 
-        pattern = (
-            r"(?<![a-z0-9])"
-            + escaped
-            + r"(?![a-z0-9])"
-        )
+        # Precise boundary pattern
+        if skill_norm == "c":
+            pattern = r"(?<![a-z0-9])c(?![a-z0-9\+\#])"
+        elif skill_norm == "js":
+            pattern = r"(?<![a-z0-9\.])js(?![a-z0-9])"
+        elif skill_norm == "r":
+            pattern = r"(?<![a-z0-9])r(?![a-z0-9\&\/])"
+        else:
+            pattern = r"(?<![a-z0-9])" + escaped + r"(?![a-z0-9])"
 
-        if re.search(
-            pattern,
-            norm_text,
-        ):
+        if re.search(pattern, norm_text):
+            if _is_valid_skill_context(skill_norm, text):
+                canonical_skill = canonicalize_skill(skill_norm)
 
-            canonical_skill = canonicalize_skill(
-                skill_norm
-            )
-
-            if canonical_skill not in GENERIC_TERMS:
-                found_skills.add(
-                    canonical_skill
-                )
+                if canonical_skill not in GENERIC_TERMS:
+                    found_skills.add(canonical_skill)
 
     # --------------------------------------------------------
     # Detect aliases explicitly
@@ -600,19 +268,19 @@ def extract_skills(text):
 
         escaped_alias = re.escape(alias)
 
-        pattern = (
-            r"(?<![a-z0-9])"
-            + escaped_alias
-            + r"(?![a-z0-9])"
-        )
+        if alias == "c":
+            pattern = r"(?<![a-z0-9])c(?![a-z0-9\+\#])"
+        elif alias == "js":
+            pattern = r"(?<![a-z0-9\.])js(?![a-z0-9])"
+        elif alias == "r":
+            pattern = r"(?<![a-z0-9])r(?![a-z0-9\&\/])"
+        else:
+            pattern = r"(?<![a-z0-9])" + escaped_alias + r"(?![a-z0-9])"
 
-        if re.search(
-            pattern,
-            norm_text,
-        ):
-
-            if canonical not in GENERIC_TERMS:
-                found_skills.add(canonical)
+        if re.search(pattern, norm_text):
+            if _is_valid_skill_context(alias, text):
+                if canonical not in GENERIC_TERMS:
+                    found_skills.add(canonical)
 
     return sorted(found_skills)
 
