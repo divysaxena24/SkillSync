@@ -272,9 +272,11 @@ class TestFinalScore:
 
         assert "tfidf_score" in result
         assert "skill_score" in result
+        assert "additional_score" in result
         assert "final_score" in result
         assert "matched_skills" in result
         assert "missing_skills" in result
+        assert "additional_skills" in result
         assert "resume_skills" in result
         assert "jd_skills" in result
 
@@ -287,7 +289,11 @@ class TestFinalScore:
         jd = "Python developer with SQL and AWS."
         result = calculate_final_score(resume, jd)
 
-        expected_final = 0.70 * result["skill_score"] + 0.30 * result["tfidf_score"]
+        expected_final = (
+            0.70 * result["skill_score"]
+            + 0.10 * result["additional_score"]
+            + 0.20 * result["tfidf_score"]
+        )
         assert result["final_score"] == pytest.approx(expected_final)
 
 
@@ -405,3 +411,169 @@ class TestRefinedBoundaryExtraction:
         assert "scikit-learn" in extracted
         assert "aws" in extracted
 
+
+
+# ============================================================
+# 11. EXPANDED DOMAIN & ACCURACY REGRESSION TESTS
+# ============================================================
+
+class TestExpandedDomainAndAccuracy:
+    def test_programming_languages_isolation(self):
+        # C vs C++ vs C#
+        text = "Expert in C++ and C# but never worked with another language."
+        skills = extract_skills(text)
+        assert "c++" in skills
+        assert "c#" in skills
+        assert "c" not in skills
+
+    def test_node_and_next_js(self):
+        text = "Built web apps with Node.js and Next.js and React."
+        skills = extract_skills(text)
+        assert "node.js" in skills
+        assert "next.js" in skills
+        assert "react" in skills
+
+    def test_machine_learning_specialized_skills(self):
+        text = "Trained XGBoost model with scikit-learn, tracked in MLflow, explained with SHAP, feature engineering applied."
+        skills = extract_skills(text)
+        assert "xgboost" in skills
+        assert "scikit-learn" in skills
+        assert "mlflow" in skills
+        assert "shap" in skills
+        assert "feature engineering" in skills
+
+    def test_parallel_computing_specialized_skills(self):
+        text = "Implemented BFS and DFS on graphs using OpenMP, Triangle Counting, parallel algorithms, synchronization, and cache coherence."
+        skills = extract_skills(text)
+        assert "openmp" in skills
+        assert "bfs" in skills
+        assert "dfs" in skills
+        assert "triangle counting" in skills
+        assert "parallel algorithms" in skills
+        assert "synchronization" in skills
+        assert "cache coherence" in skills
+
+    def test_automation_and_integration_skills(self):
+        text = "Configured n8n workflows with webhooks, REST APIs, OAuth 2.0, Slack, and Google Workspace integrations."
+        skills = extract_skills(text)
+        assert "n8n" in skills
+        assert "webhooks" in skills
+        assert "rest apis" in skills
+        assert "oauth 2.0" in skills
+        assert "slack" in skills
+        assert "google workspace" in skills
+
+    def test_devops_and_cloud_infrastructure(self):
+        text = "Infrastructure with Terraform, Helm, Kubernetes, AWS, EC2, S3, IAM, DNS, HTTP, monitoring, and logging."
+        skills = extract_skills(text)
+        assert "terraform" in skills
+        assert "helm" in skills
+        assert "kubernetes" in skills
+        assert "aws" in skills
+        assert "ec2" in skills
+        assert "s3" in skills
+        assert "iam" in skills
+        assert "dns" in skills
+        assert "http" in skills
+        assert "monitoring" in skills
+        assert "logging" in skills
+
+    def test_unrelated_resume_and_jd(self):
+        chef_resume = "Experienced head chef specializing in pastry, culinary arts, menu design, kitchen management."
+        dev_jd = "Senior Kubernetes and Terraform Cloud DevOps Engineer with AWS and CI/CD."
+        result = calculate_final_score(chef_resume, dev_jd)
+        assert result["skill_score"] == 0.0
+        assert result["matched_skills"] == []
+        assert result["final_score"] < 25.0
+        assert get_verdict(result["final_score"]) == "Low Match"
+
+    def test_empty_resume_and_jd_boundaries(self):
+        res1 = calculate_final_score("", "Python and Docker")
+        assert res1["final_score"] == 0.0
+        assert res1["skill_score"] == 0.0
+
+        res2 = calculate_final_score("Python and Docker", "")
+        assert res2["final_score"] == 0.0
+        assert res2["skill_score"] == 0.0
+
+    def test_six_jds_benchmark_consistency(self):
+        jd_ai_auto = (
+            "Python, JavaScript, n8n, REST APIs, Webhooks, Third-party integrations, "
+            "Slack, Google Workspace, Asynchronous Programming, Retry Mechanisms, "
+            "Fault Tolerance, OAuth 2.0, JSON, API Error Handling, Docker, Git, CI/CD"
+        )
+        skills = extract_skills(jd_ai_auto)
+        assert "n8n" in skills
+        assert "webhooks" in skills
+        assert "rest apis" in skills
+        assert "oauth 2.0" in skills
+        assert "retry mechanisms" in skills
+        assert "fault tolerance" in skills
+        assert "api error handling" in skills
+
+
+# ============================================================
+# 12. ADDITIONAL RELEVANT SKILLS & FORMULA TESTS
+# ============================================================
+
+class TestAdditionalRelevantSkills:
+    def test_tailwind_and_tailwind_css_deduplication(self):
+        # Tailwind and Tailwind CSS both normalize to 'tailwind css'
+        text = "Frontend developer skilled in Tailwind and Tailwind CSS."
+        skills = extract_skills(text)
+        assert skills.count("tailwind css") == 1
+        assert "tailwind" not in skills
+
+    def test_rest_api_and_rest_apis_normalization(self):
+        text = "Backend engineer creating REST API and REST APIs endpoints."
+        skills = extract_skills(text)
+        assert skills.count("rest apis") == 1
+
+    def test_additional_relevant_skills_awarded_for_related_domain(self):
+        resume = "Fullstack engineer proficient in React, TypeScript, Next.js, and FastAPI."
+        jd = "Seeking a developer skilled in React and TypeScript."
+        res = calculate_final_score(resume, jd)
+
+        # R should be 100% (React, TypeScript matched)
+        assert res["skill_score"] == 100.0
+        assert set(res["matched_skills"]) == {"react", "typescript"}
+
+        # Next.js and FastAPI should be rewarded as additional relevant skills
+        assert "next.js" in res["additional_skills"]
+        assert "fastapi" in res["additional_skills"]
+        assert res["additional_score"] > 0.0
+
+    def test_unrelated_skills_not_counted_in_additional(self):
+        resume = "React and TypeScript developer with OpenMP, BFS, and C++ experience."
+        jd = "Frontend Developer needed with React and TypeScript."
+        res = calculate_final_score(resume, jd)
+
+        # Systems/Parallel Computing skills must NOT be credited as additional for Frontend
+        assert "openmp" not in res["additional_skills"]
+        assert "c++" not in res["additional_skills"]
+        assert "bfs" not in res["additional_skills"]
+
+    def test_additional_skills_do_not_duplicate_required_matches(self):
+        resume = "React and TypeScript developer."
+        jd = "Frontend Developer needed with React and TypeScript."
+        res = calculate_final_score(resume, jd)
+
+        # Matched skills cannot appear in additional skills
+        assert set(res["matched_skills"]).isdisjoint(set(res["additional_skills"]))
+
+    def test_additional_skills_capped_at_max(self):
+        # Even with many relevant skills, additional score cannot exceed 100%
+        resume = "Fullstack expert: React, TypeScript, Next.js, FastAPI, Node.js, Express, Docker, CI/CD, MongoDB, Redis, GraphQL, SQL."
+        jd = "React and TypeScript developer."
+        res = calculate_final_score(resume, jd)
+        assert res["additional_score"] <= 100.0
+
+    def test_all_components_bounded_between_0_and_100(self):
+        resume = "Python, Docker, AWS, React, Node.js developer."
+        jd = "Python, Docker, Kubernetes developer."
+        res = calculate_final_score(resume, jd)
+
+        assert 0.0 <= res["skill_score"] <= 100.0
+        assert 0.0 <= res["additional_score"] <= 100.0
+        assert 0.0 <= res["tfidf_score"] <= 100.0
+        assert 0.0 <= res["final_score"] <= 100.0
