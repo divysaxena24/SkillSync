@@ -51,7 +51,10 @@ st.markdown(
     /* Hide standard Streamlit chrome */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
-    header[data-testid="stHeader"] { background: transparent; }
+    header[data-testid="stHeader"], div[data-testid="stHeader"] {
+        display: none !important;
+        height: 0px !important;
+    }
     section[data-testid="stSidebar"] { display: none !important; }
 
     .stApp {
@@ -62,10 +65,14 @@ st.markdown(
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }
 
-    .main .block-container {
+    .main .block-container, div[data-testid="stAppViewBlockContainer"] {
         max-width: 1060px;
-        padding-top: 1.5rem;
-        padding-bottom: 4rem;
+        padding-top: 1rem !important;
+        padding-bottom: 3.5rem !important;
+        margin-top: 0 !important;
+    }
+    div[data-testid="stVerticalBlock"] > div:first-child {
+        margin-top: 0 !important;
     }
 
     /* ---------- Navigation Header ---------- */
@@ -549,6 +556,12 @@ st.markdown(
         border: 1px solid #bbf7d0;
     }
 
+    .skill-pill.additional {
+        background: #e0e7ff;
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+    }
+
     .skill-pill.missing {
         background: var(--danger-bg);
         color: var(--danger-text);
@@ -777,13 +790,16 @@ def render_results(result):
     verdict = get_verdict(score)
     tfidf_score = result["tfidf_score"]
     skill_score = result["skill_score"]
+    additional_score = result.get("additional_score", 0.0)
 
     matched_skills = result.get("matched_skills", [])
+    additional_skills = result.get("additional_skills", [])
     missing_skills = result.get("missing_skills", [])
     resume_skills = result.get("resume_skills", [])
 
     required_cnt = len(matched_skills) + len(missing_skills)
     matched_cnt = len(matched_skills)
+    additional_cnt = len(additional_skills)
     missing_cnt = len(missing_skills)
 
     pct = max(0.0, min(100.0, float(score)))
@@ -797,6 +813,7 @@ def render_results(result):
                 <div>
                     <span class="verdict-badge {get_verdict_class(verdict)}">{esc(verdict)}</span>
                     <div style="font-size:0.9rem; color:#64748b;">Overall compatibility score between your resume & role.</div>
+                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.35rem;">Formula: 70% Required (R) + 10% Additional (A) + 20% TF-IDF (T)</div>
                 </div>
                 <div style="text-align:right;">
                     <div class="score-big">{pct:.2f}%</div>
@@ -811,17 +828,17 @@ def render_results(result):
         unsafe_allow_html=True,
     )
 
-    # Metrics row
-    col1, col2 = st.columns(2, gap="large")
+    # Metrics row (3 components: Required 70%, Additional 10%, TF-IDF 20%)
+    col1, col2, col3 = st.columns(3, gap="medium")
     with col1:
         st.markdown(
             f"""
             <div class="metric-box">
-                <div style="font-size:0.85rem; font-weight:700; color:#64748b;">TF-IDF Similarity</div>
-                <div class="metric-val" style="color:#6366f1;">{tfidf_score:.2f}%</div>
-                <div style="font-size:0.78rem; color:#94a3b8;">Measures textual similarity between resume and job description.</div>
+                <div style="font-size:0.85rem; font-weight:700; color:#64748b;">Required Skill Match (R)</div>
+                <div class="metric-val" style="color:#6366f1;">{skill_score:.2f}%</div>
+                <div style="font-size:0.75rem; color:#94a3b8;">70% weight · Explicit JD requirements matched.</div>
                 <div class="progress-track-light" style="margin-top:0.6rem;">
-                    <div class="progress-fill-gradient" style="width:{tfidf_score:.2f}%;"></div>
+                    <div class="progress-fill-gradient" style="width:{skill_score:.2f}%;"></div>
                 </div>
             </div>
             """,
@@ -831,11 +848,25 @@ def render_results(result):
         st.markdown(
             f"""
             <div class="metric-box">
-                <div style="font-size:0.85rem; font-weight:700; color:#64748b;">Skill Match Score</div>
-                <div class="metric-val" style="color:#8b5cf6;">{skill_score:.2f}%</div>
-                <div style="font-size:0.78rem; color:#94a3b8;">Percentage of required job skills found in your resume.</div>
+                <div style="font-size:0.85rem; font-weight:700; color:#64748b;">Additional Relevant (A)</div>
+                <div class="metric-val" style="color:#8b5cf6;">{additional_score:.2f}%</div>
+                <div style="font-size:0.75rem; color:#94a3b8;">10% weight · Related role skills beyond JD.</div>
                 <div class="progress-track-light" style="margin-top:0.6rem;">
-                    <div class="progress-fill-gradient" style="width:{skill_score:.2f}%;"></div>
+                    <div class="progress-fill-gradient" style="width:{additional_score:.2f}%;"></div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col3:
+        st.markdown(
+            f"""
+            <div class="metric-box">
+                <div style="font-size:0.85rem; font-weight:700; color:#0ea5e9;">TF-IDF Similarity (T)</div>
+                <div class="metric-val" style="color:#0ea5e9;">{tfidf_score:.2f}%</div>
+                <div style="font-size:0.75rem; color:#94a3b8;">20% weight · Textual & contextual overlap.</div>
+                <div class="progress-track-light" style="margin-top:0.6rem;">
+                    <div class="progress-fill-gradient" style="width:{tfidf_score:.2f}%;"></div>
                 </div>
             </div>
             """,
@@ -852,8 +883,12 @@ def render_results(result):
                 <div class="stat-num">{required_cnt}</div>
             </div>
             <div>
-                <div class="stat-lbl">Matched</div>
+                <div class="stat-lbl">Matched (R)</div>
                 <div class="stat-num success">{matched_cnt}</div>
+            </div>
+            <div>
+                <div class="stat-lbl">Additional (A)</div>
+                <div class="stat-num" style="color:#8b5cf6;">{additional_cnt}</div>
             </div>
             <div>
                 <div class="stat-lbl">Missing Gaps</div>
@@ -864,14 +899,14 @@ def render_results(result):
         unsafe_allow_html=True,
     )
 
-    # Matched vs Missing skills
-    col1, col2 = st.columns(2, gap="large")
+    # Matched vs Additional vs Missing skills
+    col1, col2, col3 = st.columns(3, gap="medium")
     with col1:
         st.markdown(
             f"""
             <div class="results-card">
                 <h4 style="margin:0 0 0.4rem 0; color:#0f172a; font-weight:750;">Matched Skills ({matched_cnt})</h4>
-                <p style="font-size:0.8rem; color:#64748b; margin-bottom:0.8rem;">Skills from the job description detected in your resume.</p>
+                <p style="font-size:0.78rem; color:#64748b; margin-bottom:0.8rem;">Explicit requirements found in resume.</p>
             """,
             unsafe_allow_html=True,
         )
@@ -886,8 +921,24 @@ def render_results(result):
         st.markdown(
             f"""
             <div class="results-card">
+                <h4 style="margin:0 0 0.4rem 0; color:#0f172a; font-weight:750;">Additional Relevant ({additional_cnt})</h4>
+                <p style="font-size:0.78rem; color:#64748b; margin-bottom:0.8rem;">Extra domain skills beyond JD list.</p>
+            """,
+            unsafe_allow_html=True,
+        )
+        if additional_skills:
+            badges = "".join([f'<span class="skill-pill additional">{esc(s)}</span>' for s in additional_skills])
+            st.markdown(f"<div>{badges}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown("<p style='font-size:0.8rem; color:#94a3b8;'>No extra relevant skills detected.</p>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col3:
+        st.markdown(
+            f"""
+            <div class="results-card">
                 <h4 style="margin:0 0 0.4rem 0; color:#0f172a; font-weight:750;">Skill Gaps ({missing_cnt})</h4>
-                <p style="font-size:0.8rem; color:#64748b; margin-bottom:0.8rem;">Requirements from the job description missing in your resume.</p>
+                <p style="font-size:0.78rem; color:#64748b; margin-bottom:0.8rem;">Requirements from JD missing in resume.</p>
             """,
             unsafe_allow_html=True,
         )
@@ -936,9 +987,11 @@ def render_results(result):
     report_json = json.dumps({
         "compatibility_score": f"{score:.2f}%",
         "verdict": verdict,
-        "skill_match_score": f"{skill_score:.2f}%",
+        "required_skill_match_score": f"{skill_score:.2f}%",
+        "additional_relevant_score": f"{additional_score:.2f}%",
         "tfidf_similarity": f"{tfidf_score:.2f}%",
         "matched_skills": matched_skills,
+        "additional_skills": additional_skills,
         "missing_skills": missing_skills,
         "resume_skills": resume_skills,
     }, indent=2)
